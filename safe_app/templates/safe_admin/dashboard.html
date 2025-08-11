@@ -1,0 +1,704 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Admin Dashboard - Safe Gym</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            color: #2c3e50;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            border-right: 1px solid #e8ecf0;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 25px;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            color: #7f8c8d;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: #5a6c7d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 0 25px 25px 0;
+            margin-right: 20px;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            color: #2c3e50;
+            transform: translateX(5px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.15), rgba(46, 204, 113, 0.15));
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            background: #f8f9fa;
+            margin-top: 5px;
+            border-radius: 0 15px 15px 0;
+            overflow: hidden;
+            margin-right: 20px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content .nav-link {
+            padding: 10px 40px;
+            font-size: 13px;
+            margin-right: 0;
+            border-radius: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+        }
+
+        .header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-grow: 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            color: #5a6c7d;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            color: #3498db;
+        }
+
+        .card-value {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-change {
+            font-size: 12px;
+            color: #27ae60;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-change::before {
+            content: '↗';
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 280px);
+        }
+
+        .chart-title {
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+
+        #revenueExpensesChart {
+            max-height: calc(100vh - 350px);
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                order: 2;
+                height: auto;
+            }
+
+            .main-content {
+                order: 1;
+                padding: 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .chart-container {
+                max-height: calc(100vh - 400px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Safe Gym</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+                            <span class="nav-icon">📊</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'add_user' %}" class="nav-link {% if request.path == '/add-user/' %}active{% endif %}">
+                            <span class="nav-icon">👤</span>
+                            Add User
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'fee_details' %}" class="nav-link {% if request.path == '/fee-details/' %}active{% endif %}">
+                            <span class="nav-icon">💰</span>
+                            Fee Details
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {% if request.path == '/income-report/' or request.path == '/expense-report/' %}active{% endif %}">
+                            <span class="nav-icon">📋</span>
+                            Reports
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'income_report' %}" class="nav-link {% if request.path == '/income-report/' %}active{% endif %}">
+                                <span class="nav-icon">📈</span>
+                                Income Report
+                            </a>
+                            <a href="{% url 'expense_report' %}" class="nav-link {% if request.path == '/expense-report/' %}active{% endif %}">
+                                <span class="nav-icon">📉</span>
+                                Expense Report
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'expenses' %}" class="nav-link {% if request.path == '/expenses/' %}active{% endif %}">
+                            <span class="nav-icon">💸</span>
+                            Expenses
+                        </a>
+                    </li>
+                    {% comment %} <li class="nav-item">
+                        <a href="{% url 'fee_adding' %}" class="nav-link {% if request.path == '/fee-adding/' %}active{% endif %}">
+                            <span class="nav-icon">➕</span>
+                            Fee Adding
+                        </a>
+                    </li> {% endcomment %}
+                    <li class="nav-item">
+                        <a href="{% url 'manage_fees' %}" class="nav-link {% if request.path == '/manage-fees/' %}active{% endif %}">
+                            <span class="nav-icon">⚙️</span>
+                            Manage Fees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_logout' %}" class="nav-link logout-link {% if request.path == '/logout/' %}active{% endif %}">
+                            <span class="nav-icon">🚪</span>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <div class="header">
+                <h2>Dashboard Overview</h2>
+                <form method="POST" action="{% url 'admin_logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Total Members</span>
+                        <span class="card-icon">👥</span>
+                    </div>
+                    <div class="card-value">{{ total_members|default:"0" }}</div>
+                    <div class="card-change">{{ new_members|default:"0" }} new this month</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Monthly Revenue</span>
+                        <span class="card-icon">💰</span>
+                    </div>
+                    <div class="card-value">₹{{ monthly_revenue|default:"0.00" }}</div>
+                    <div class="card-change">{{ revenue_change|default:"0" }}% increase</div>
+                </div>
+
+                {% comment %} <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Active Trainers</span>
+                        <span class="card-icon">🏃</span>
+                    </div>
+                    <div class="card-value">{{ active_trainers|default:"0" }}</div>
+                    <div class="card-change">{{ trainer_status|default:"No change" }}</div>
+                </div> {% endcomment %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Pending Fees</span>
+                        <span class="card-icon">⏰</span>
+                    </div>
+                    <div class="card-value">{{ pending_fees|default:"0" }}</div>
+                    <div class="card-change">{{ overdue_fees|default:"0" }} overdue</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Monthly Performance Analytics</h3>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">₹{{ total_income|default:"0.00" }}</div>
+                        <div class="stat-label">TOTAL INCOME</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹{{ total_expenses|default:"0.00" }}</div>
+                        <div class="stat-label">TOTAL EXPENSES</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹{{ net_profit|default:"0.00" }}</div>
+                        <div class="stat-label">NET PROFIT</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ total_members|default:"0" }}</div>
+                        <div class="stat-label">ACTIVE MEMBERS</div>
+                    </div>
+                </div>
+                <canvas id="revenueExpensesChart"></canvas>
+                <div id="chartError" style="display: none; text-align: center; padding: 20px; color: #e74c3c;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.classList.contains('dropdown-toggle')) {
+                    e.preventDefault();
+                    const dropdownContent = this.nextElementSibling;
+                    dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+                } else if (!this.classList.contains('logout-link')) {
+                    window.location.href = this.href;
+                }
+            });
+        });
+
+        // Card animations
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.12)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.08)';
+            });
+        });
+
+        // Smooth loading animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.card, .chart-container');
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = 'all 0.5s ease';
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 100 + 200);
+            });
+        });
+
+        // Chart.js integration with improved error handling and fallback
+        async function renderChart() {
+            const chartCanvas = document.getElementById('revenueExpensesChart');
+            const chartError = document.getElementById('chartError');
+
+            try {
+                const response = await fetch('{% url "get_dashboard_data" %}');
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.months && result.data.revenue && result.data.expenses) {
+                    const ctx = chartCanvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: result.data.months,
+                            datasets: [
+                                {
+                                    label: 'Revenue',
+                                    data: result.data.revenue,
+                                    backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                                    borderColor: 'rgba(52, 152, 219, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Expenses',
+                                    data: result.data.expenses,
+                                    backgroundColor: 'rgba(231, 76, 60, 0.5)',
+                                    borderColor: 'rgba(231, 76, 60, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Amount (₹)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Month'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                title: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback to sample data for testing
+                    const sampleData = {
+                        months: ['January 2025', 'February 2025', 'March 2025', 'April 2025'],
+                        revenue: [10000, 12000, 15000, 13000],
+                        expenses: [5000, 6000, 7000, 6500]
+                    };
+                    const ctx = chartCanvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: sampleData.months,
+                            datasets: [
+                                {
+                                    label: 'Revenue',
+                                    data: sampleData.revenue,
+                                    backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                                    borderColor: 'rgba(52, 152, 219, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Expenses',
+                                    data: sampleData.expenses,
+                                    backgroundColor: 'rgba(231, 76, 60, 0.5)',
+                                    borderColor: 'rgba(231, 76, 60, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Amount (₹)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Month'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sample Data (Backend Failed)'
+                                }
+                            }
+                        }
+                    });
+                    chartError.style.display = 'block';
+                    chartError.textContent = `Using sample data. Backend error: ${result.message || 'Invalid data format'}`;
+                }
+            } catch (error) {
+                chartCanvas.style.display = 'none';
+                chartError.style.display = 'block';
+                chartError.textContent = `Error loading chart data: ${error.message}`;
+            }
+        }
+
+        // Initialize chart
+        document.addEventListener('DOMContentLoaded', renderChart);
+
+        // Prevent back/forward cache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

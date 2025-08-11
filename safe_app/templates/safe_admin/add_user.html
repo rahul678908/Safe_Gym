@@ -1,0 +1,2119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Add User - Safe Gym</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            background: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            border-right: 1px solid #e8ecf0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+        }
+
+        /* Logo Styling */
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 25px;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            color: #7f8c8d;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Navigation Styling */
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: #5a6c7d;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 0 25px 25px 0;
+            margin-right: 20px;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            color: #2c3e50;
+            transform: translateX(5px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.15), rgba(46, 204, 113, 0.15));
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Dropdown Styling */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            background: #f8f9fa;
+            margin-top: 5px;
+            border-radius: 0 15px 15px 0;
+            overflow: hidden;
+            margin-right: 20px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-content .nav-link {
+            padding: 10px 40px;
+            font-size: 13px;
+            margin-right: 0;
+            border-radius: 0;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+            margin-left: 280px; /* Matches sidebar width */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Header Styling */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+        }
+
+        .main-header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .main-header p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        /* Stats Card Styling */
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .stats-card .d-flex {
+            align-items: center;
+        }
+
+        .stats-card i {
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            color: #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .stats-card h4 {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stats-card small {
+            color: #7f8c8d;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e8ecf0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: transparent;
+            color: #2c3e50;
+            border-radius: 0;
+            padding: 20px;
+            border-bottom: 1px solid #e8ecf0;
+            position: relative;
+        }
+
+        .card-header h5 {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 0;
+            color: #2c3e50;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Buttons Styling */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
+
+        .btn-light {
+            background: white;
+            color: #3498db;
+            border: 2px solid #e8ecf0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-light:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            color: #3498db;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            color: white;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
+            color: white;
+        }
+
+        /* Form Controls Styling */
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e8ecf0;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            background: white;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+
+        .form-row {
+            margin-bottom: 1.5rem;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            border-bottom: none;
+            padding: 20px;
+            position: relative;
+        }
+
+        .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e8ecf0;
+        }
+
+        .modal-dialog {
+            margin: 1.75rem auto;
+        }
+
+        .modal-xl {
+            max-width: 1200px;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e8ecf0;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 12px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #e8ecf0;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background: rgba(52, 152, 219, 0.02);
+        }
+
+        .table-hover tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        /* Table Scroll Container */
+        .table-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: #3498db #e8ecf0;
+        }
+
+        .table-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-track {
+            background: #e8ecf0;
+            border-radius: 8px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 8px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #2980b9, #27ae60);
+        }
+
+        #customersTable {
+            min-width: 1200px;
+            width: 100%;
+        }
+
+        /* Badges Styling */
+        .badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.bg-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+        }
+
+        .badge.bg-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+        }
+
+        /* Alerts Styling */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+
+        .alert-success::before {
+            background: #27ae60;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+            color: #721c24;
+        }
+
+        .alert-danger::before {
+            background: #e74c3c;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+        }
+
+        .alert-warning::before {
+            background: #f39c12;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+
+        .alert-info::before {
+            background: #3498db;
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.15);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Image Preview */
+        .image-preview {
+            padding: 1rem;
+            border: 2px dashed #e8ecf0;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.02);
+        }
+
+        .img-thumbnail {
+            border: 2px solid #e8ecf0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .img-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* DataTables Wrapper Styling */
+        .dataTables_wrapper {
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Search Input Styling */
+        .dataTables_filter input {
+            border-radius: 10px;
+            border: 2px solid #e8ecf0;
+            padding: 10px 16px;
+            margin-left: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .dataTables_filter input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Length Select Styling */
+        .dataTables_length select {
+            border-radius: 10px;
+            border: 2px solid #e8ecf0;
+            padding: 8px 12px;
+            margin: 0 8px;
+            font-size: 14px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .dataTables_length select:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Info Text Styling */
+        .dataTables_info {
+            color: #5a6c7d;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 0;
+        }
+
+        /* Pagination Container */
+        .dataTables_paginate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+
+        /* Reset default DataTables pagination styles */
+        .dataTables_paginate .paginate_button {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 40px !important;
+            height: 40px !important;
+            padding: 0 12px !important;
+            margin: 0 !important;
+            border: 2px solid #e8ecf0 !important;
+            border-radius: 10px !important;
+            background: #ffffff !important;
+            color: #5a6c7d !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Hover State */
+        .dataTables_paginate .paginate_button:hover:not(.disabled) {
+            background: linear-gradient(45deg, #3498db, #2ecc71) !important;
+            color: white !important;
+            border-color: transparent !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3) !important;
+        }
+
+        /* Current/Active Page */
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(45deg, #3498db, #2ecc71) !important;
+            color: white !important;
+            border-color: transparent !important;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4) !important;
+            font-weight: 700 !important;
+        }
+
+        /* Disabled State */
+        .dataTables_paginate .paginate_button.disabled {
+            background: #f8f9fa !important;
+            color: #bdc3c7 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6 !important;
+            border-color: #e8ecf0 !important;
+        }
+
+        .dataTables_paginate .paginate_button.disabled:hover {
+            transform: none !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Previous and Next buttons styling */
+        .dataTables_paginate .paginate_button.previous,
+        .dataTables_paginate .paginate_button.next {
+            font-weight: 600 !important;
+            padding: 0 16px !important;
+        }
+
+        /* Ellipsis styling */
+        .dataTables_paginate .ellipsis {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 40px !important;
+            height: 40px !important;
+            color: #5a6c7d !important;
+            font-weight: 600 !important;
+            cursor: default !important;
+        }
+
+        /* Button Groups */
+        .btn-group-sm > .btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group-sm > .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .sidebar { width: 280px; }
+            .main-content { margin-left: 280px; }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar { width: 260px; }
+            .main-content { margin-left: 260px; }
+            .main-header h1 { font-size: 20px; }
+            .stats-card { padding: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                order: 2;
+                position: relative;
+                box-shadow: none;
+                border-right: none;
+                border-top: 1px solid #e8ecf0;
+            }
+            .main-content {
+                order: 1;
+                margin-left: 0;
+                padding: 15px;
+            }
+            .main-header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .main-header h1 { font-size: 18px; }
+            .card-body { padding: 15px; }
+            .modal-dialog { margin: 0.5rem; }
+            .modal-body { padding: 15px; }
+            .nav-link {
+                padding: 10px 25px;
+                margin-right: 0;
+                border-radius: 0;
+            }
+            .nav-link:hover { transform: none; }
+            .dropdown-content { margin-right: 0; }
+            .btn-group-sm > .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            .table-scroll-container { max-height: calc(100vh - 450px); }
+            #customersTable { min-width: 800px; }
+        }
+
+        @media (max-width: 576px) {
+            .main-header h1 { font-size: 16px; }
+            .main-header p { font-size: 12px; }
+            .stats-card { padding: 10px; text-align: center; }
+            .stats-card h4 { font-size: 24px; }
+            .table-responsive { font-size: 0.8rem; }
+            .btn { font-size: 0.8rem; padding: 0.5rem 1rem; }
+            .form-control { font-size: 0.9rem; }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hover Effects */
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #2980b9, #27ae60);
+        }
+
+        /* Focus Styles */
+        .btn:focus,
+        .form-control:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .main-header, .btn, .modal { display: none !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; }
+            .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
+
+        /* Animation for page load */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .fade-in.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modern Table Header Styling */
+        .dataTables_wrapper table.dataTable thead th {
+            background: linear-gradient(45deg, #f8f9fa, #ffffff);
+            color: #2c3e50;
+            font-weight: 700;
+            border-bottom: 2px solid #e8ecf0;
+            padding: 16px 12px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Table Row Styling */
+        .dataTables_wrapper table.dataTable tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .dataTables_wrapper table.dataTable tbody tr:hover {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.03), rgba(46, 204, 113, 0.03));
+        }
+
+        .dataTables_wrapper table.dataTable tbody td {
+            padding: 14px 12px;
+            color: #2c3e50;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        /* Even row styling */
+        .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        .dataTables_wrapper table.dataTable tbody tr:nth-child(even):hover {
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.05), rgba(46, 204, 113, 0.05));
+        }
+    
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Safe Gym</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+                            <span class="nav-icon">📊</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'add_user' %}" class="nav-link {% if request.path == '/add-user/' %}active{% endif %}">
+                            <span class="nav-icon">👤</span>
+                            Add User
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'fee_details' %}" class="nav-link {% if request.path == '/fee-details/' %}active{% endif %}">
+                            <span class="nav-icon">💰</span>
+                            Fee Details
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {% if request.path == '/income-report/' or request.path == '/expense-report/' %}active{% endif %}">
+                            <span class="nav-icon">📋</span>
+                            Reports
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'income_report' %}" class="nav-link {% if request.path == '/income-report/' %}active{% endif %}">
+                                <span class="nav-icon">📈</span>
+                                Income Report
+                            </a>
+                            <a href="{% url 'expense_report' %}" class="nav-link {% if request.path == '/expense-report/' %}active{% endif %}">
+                                <span class="nav-icon">📉</span>
+                                Expense Report
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'expenses' %}" class="nav-link {% if request.path == '/expenses/' %}active{% endif %}">
+                            <span class="nav-icon">💸</span>
+                            Expenses
+                        </a>
+                    </li>
+                    {% comment %} <li class="nav-item">
+                        <a href="{% url 'fee_adding' %}" class="nav-link {% if request.path == '/fee-adding/' %}active{% endif %}">
+                            <span class="nav-icon">➕</span>
+                            Fee Adding
+                        </a>
+                    </li> {% endcomment %}
+                    <li class="nav-item">
+                        <a href="{% url 'manage_fees' %}" class="nav-link {% if request.path == '/manage-fees/' %}active{% endif %}">
+                            <span class="nav-icon">⚙️</span>
+                            Manage Fees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin_logout' %}" class="nav-link logout-link {% if request.path == '/logout/' %}active{% endif %}">
+                            <span class="nav-icon">🚪</span>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <!-- Header -->
+           <!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+</head>
+<body>
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Customer Management
+                    </h1>
+                    <p class="mb-0 mt-2">Add and manage customer records</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-light btn-lg" id="addCustomerBtn">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Add New Customer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">{{ total_customers }}</h4>
+                            <small>Total Customers</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Customer Records
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-scroll-container">
+                    <div class="table-responsive">
+                        <table id="customersTable" class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Customer ID</th>
+                                    <th>Gender</th>
+                                    <th>Age</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Package</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded via DataTables -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Add New Customer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Basic Information</h6>
+                            <div class="form-row">
+                                <label for="name" class="form-label">Name <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="customer_id" class="form-label">Customer ID</label>
+                                <input type="text" class="form-control" id="customer_id" name="customer_id">
+                            </div>
+                            <div class="form-row">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-control" id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" name="age">
+                            </div>
+                            <div class="form-row">
+                                <label for="email" class="form-label">Email <span class="required">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="phone" class="form-label">Phone <span class="required">*</span></label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Health Information</h6>
+                            <div class="form-row">
+                                <label for="weight" class="form-label">Weight</label>
+                                <input type="text" class="form-control" id="weight" name="weight" placeholder="e.g., 70 kg">
+                            </div>
+                            <div class="form-row">
+                                <label for="height" class="form-label">Height</label>
+                                <input type="text" class="form-control" id="height" name="height" placeholder="e.g., 5'7''">
+                            </div>
+                            <div class="form-row">
+                                <label for="blood_group" class="form-label">Blood Group</label>
+                                <select class="form-control" id="blood_group" name="blood_group">
+                                    <option value="">Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="bp_sugar" class="form-label">BP/Sugar</label>
+                                <input type="text" class="form-control" id="bp_sugar" name="bp_sugar">
+                            </div>
+                            <div class="form-row">
+                                <label for="sugar" class="form-label">Sugar Level</label>
+                                <input type="text" class="form-control" id="sugar" name="sugar">
+                            </div>
+                            <div class="form-row">
+                                <label for="other_problems" class="form-label">Other Problems</label>
+                                <textarea class="form-control" id="other_problems" name="other_problems" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Package Information</h6>
+                            <div class="form-row">
+                                <label for="package" class="form-label">Package <span class="required">*</span></label>
+                                <select class="form-control" id="package" name="package" required>
+                                    <option value="">Select Package</option>
+                                    <!-- Populated dynamically via JavaScript -->
+                                </select>
+                                <small class="text-muted" id="packageNote"></small>
+                            </div>
+                            <div class="form-row">
+                                <label for="transaction_type" class="form-label">Transaction Type <span class="required">*</span></label>
+                                <select class="form-control" id="transaction_type" name="transaction_type" required>
+                                    <option value="">Select Transaction Type</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Date Information</h6>
+                            <div class="form-row">
+                                <label for="date" class="form-label">Date <span class="required">*</span></label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="due_date" name="due_date">
+                            </div>
+                            <div class="form-row">
+                                <label for="month" class="form-label">Month</label>
+                                <input type="text" class="form-control" id="month" name="month">
+                            </div>
+                            <div class="form-row">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Break Information</h6>
+                            <div class="form-row">
+                                <label for="break_start" class="form-label">Break Start</label>
+                                <input type="date" class="form-control" id="break_start" name="break_start">
+                            </div>
+                            <div class="form-row">
+                                <label for="break_end" class="form-label">Break End</label>
+                                <input type="date" class="form-control" id="break_end" name="break_end">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Additional Information</h6>
+                            <div class="form-row">
+                                <label for="photo" class="form-label">Photo</label>
+                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                                <div class="image-preview mt-2" style="display: none;">
+                                    <small class="text-muted">Preview:</small>
+                                    <img id="add_photo_preview" src="" class="img-thumbnail mt-1" style="max-width: 100px;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <label for="message_clicks" class="form-label">Message Clicks</label>
+                                <input type="number" class="form-control" id="message_clicks" name="message_clicks" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitAddUser()">
+                    <i class="fas fa-save me-2"></i>Add Customer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">
+                    <i class="fas fa-user-edit me-2"></i>
+                    Edit Customer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_customer_id" name="customer_id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Basic Information</h6>
+                            <div class="form-row">
+                                <label for="edit_name" class="form-label">Name <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="edit_name" name="name" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_customer_id_field" class="form-label">Customer ID</label>
+                                <input type="text" class="form-control" id="edit_customer_id_field" name="customer_id">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_gender" class="form-label">Gender</label>
+                                <select class="form-control" id="edit_gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="edit_age" name="age">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_email" class="form-label">Email <span class="required">*</span></label>
+                                <input type="email" class="form-control" id="edit_email" name="email" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_phone" class="form-label">Phone <span class="required">*</span></label>
+                                <input type="tel" class="form-control" id="edit_phone" name="phone" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_address" class="form-label">Address</label>
+                                <textarea class="form-control" id="edit_address" name="address" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Health Information</h6>
+                            <div class="form-row">
+                                <label for="edit_weight" class="form-label">Weight</label>
+                                <input type="text" class="form-control" id="edit_weight" name="weight" placeholder="e.g., 70 kg">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_height" class="form-label">Height</label>
+                                <input type="text" class="form-control" id="edit_height" name="height" placeholder="e.g., 5'7''">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_blood_group" class="form-label">Blood Group</label>
+                                <select class="form-control" id="edit_blood_group" name="blood_group">
+                                    <option value="">Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_bp_sugar" class="form-label">BP/Sugar</label>
+                                <input type="text" class="form-control" id="edit_bp_sugar" name="bp_sugar">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_sugar" class="form-label">Sugar Level</label>
+                                <input type="text" class="form-control" id="edit_sugar" name="sugar">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_other_problems" class="form-label">Other Problems</label>
+                                <textarea class="form-control" id="edit_other_problems" name="other_problems" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Package Information</h6>
+                            <div class="form-row">
+                                <label for="edit_package" class="form-label">Package <span class="required">*</span></label>
+                                <select class="form-control" id="edit_package" name="package" required>
+                                    <option value="">Select Package</option>
+                                    <!-- Populated dynamically via JavaScript -->
+                                </select>
+                                <small class="text-muted" id="editPackageNote"></small>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_transaction_type" class="form-label">Transaction Type <span class="required">*</span></label>
+                                <select class="form-control" id="edit_transaction_type" name="transaction_type" required>
+                                    <option value="">Select Transaction Type</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_amount" class="form-label">Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="edit_amount" name="amount">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_advance" class="form-label">Advance</label>
+                                <input type="number" step="0.01" class="form-control" id="edit_advance" name="advance">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_total_amount" class="form-label">Total Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="edit_total_amount" name="total_amount">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Date Information</h6>
+                            <div class="form-row">
+                                <label for="edit_date" class="form-label">Date <span class="required">*</span></label>
+                                <input type="date" class="form-control" id="edit_date" name="date" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_due_date" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="edit_due_date" name="due_date">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_last_paid" class="form-label">Last Paid</label>
+                                <input type="date" class="form-control" id="edit_last_paid" name="last_paid">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_month" class="form-label">Month</label>
+                                <input type="text" class="form-control" id="edit_month" name="month">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_status" class="form-label">Status</label>
+                                <select class="form-control" id="edit_status" name="status">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Break Information</h6>
+                            <div class="form-row">
+                                <label for="edit_break_start" class="form-label">Break Start</label>
+                                <input type="date" class="form-control" id="edit_break_start" name="break_start">
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_break_end" class="form-label">Break End</label>
+                                <input type="date" class="form-control" id="edit_break_end" name="break_end">
+                            </div>
+                            <div class="form-row">
+                                <button type="button" class="btn btn-warning" id="break_btn">
+                                    <i class="fas fa-pause me-2"></i>Break
+                                </button>
+                                <button type="button" class="btn btn-success" id="unbreak_btn" style="display: none;">
+                                    <i class="fas fa-play me-2"></i>Unbreak
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Additional Information</h6>
+                            <div class="form-row">
+                                <label for="edit_photo" class="form-label">Photo</label>
+                                <input type="file" class="form-control" id="edit_photo" name="photo" accept="image/*">
+                                <div class="mt-2">
+                                    <small class="text-muted">Current Photo:</small>
+                                    <img id="current_photo" src="" class="img-thumbnail mt-1" style="max-width: 100px; display: none;">
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="remove_photo_btn" style="display: none;">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                                <div class="image-preview mt-2" style="display: none;">
+                                    <small class="text-muted">New Photo Preview:</small>
+                                    <img id="edit_photo_preview" src="" class="img-thumbnail mt-1" style="max-width: 100px;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <label for="edit_message_clicks" class="form-label">Message Clicks</label>
+                                <input type="number" class="form-control" id="edit_message_clicks" name="message_clicks" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-success" onclick="submitEditUser()">
+                    <i class="fas fa-save me-2"></i>Update Customer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">
+                        <i class="fas fa-trash me-2"></i>
+                        Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this customer?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                    <input type="hidden" id="delete_customer_id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customersTable;
+        let editingCustomerId = null;
+        let deletingCustomerId = null;
+        let isOnBreak = false;
+        let packageConfig = {};
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        async function fetchPackages() {
+            try {
+                const response = await axios.get('{% url "get_packages" %}');
+                if (response.data.success && response.data.packages) {
+                    packageConfig = response.data.package_config;
+                    const addPackageSelect = $('#package');
+                    const editPackageSelect = $('#edit_package');
+                    addPackageSelect.empty().append('<option value="">Select Package</option>');
+                    editPackageSelect.empty().append('<option value="">Select Package</option>');
+                    response.data.packages.forEach(pkg => {
+                        const optionText = `${pkg.package} (₹${pkg.amount.toFixed(2)})`;
+                        addPackageSelect.append(`<option value="${pkg.package}">${optionText}</option>`);
+                        editPackageSelect.append(`<option value="${pkg.package}">${optionText}</option>`);
+                    });
+                    // Update package note
+                    updatePackageNote();
+                } else {
+                    showAlert('Failed to load packages: ' + (response.data.message || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                showAlert('Error loading packages: ' + error.message, 'danger');
+            }
+        }
+
+        function updatePackageNote() {
+            const addNote = $('#packageNote');
+            const editNote = $('#editPackageNote');
+            const noteText = Object.keys(packageConfig).length > 0 ?
+                `Note: Amounts include applicable fees as per package configuration.` :
+                `Note: No packages available.`;
+            addNote.text(noteText);
+            editNote.text(noteText);
+        }
+
+        $(document).ready(function() {
+            initializeDataTable();
+            setDefaultDate();
+            fetchPackages();
+
+            $('#remove_photo_btn').click(function() {
+                $('#current_photo').attr('src', '').hide();
+                $('#remove_photo_btn').hide();
+                if (!$('#remove_photo_flag').length) {
+                    $('#editUserForm').append('<input type="hidden" id="remove_photo_flag" name="remove_photo" value="1">');
+                }
+            });
+
+            $('#addCustomerBtn').click(function() {
+                showAddUserModal();
+            });
+
+            $('#package').change(function() {
+                updatePackageFields('#addUserForm', '#package', '#amount', '#advance', '#total_amount', '#date', '#due_date', '#month');
+            });
+
+            $('#edit_package').change(function() {
+                updatePackageFields('#editUserForm', '#edit_package', '#edit_amount', '#edit_advance', '#edit_total_amount', '#edit_date', '#edit_due_date', '#edit_month');
+            });
+
+            $('#date').change(function() {
+                updateDueDate('#addUserForm', '#package', '#date', '#due_date');
+                updateMonthField('#addUserForm', '#package', '#date', '#month');
+            });
+
+            $('#edit_date').change(function() {
+                updateDueDate('#editUserForm', '#edit_package', '#edit_date', '#edit_due_date');
+                updateMonthField('#editUserForm', '#edit_package', '#edit_date', '#edit_month');
+            });
+
+            $('#break_btn').click(function() {
+                const today = new Date().toISOString().split('T')[0];
+                $('#edit_break_start').val(today);
+                $('#edit_break_end').val('');
+                $('#edit_due_date').val('');
+                $('#break_btn').hide();
+                $('#unbreak_btn').show();
+                isOnBreak = true;
+            });
+
+            $('#unbreak_btn').click(function() {
+                $('#edit_break_start').val('');
+                $('#edit_break_end').val('');
+                $('#break_btn').show();
+                $('#unbreak_btn').hide();
+                isOnBreak = false;
+                updateDueDate('#editUserForm', '#edit_package', '#edit_date', '#edit_due_date');
+            });
+
+            document.querySelectorAll('.nav-link:not(.logout-link)').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    if (!this.parentElement.parentElement.classList.contains('dropdown-content')) {
+                        this.classList.add('active');
+                    }
+                    window.location.href = this.getAttribute('href');
+                });
+            });
+        });
+
+        function initializeDataTable() {
+            customersTable = $('#customersTable').DataTable({
+                "processing": true,
+                "serverSide": false,
+                "ajax": {
+                    "url": "{% url 'get_customers_data' %}",
+                    "type": "GET",
+                    "dataSrc": function(json) {
+                        if (json.success) {
+                            return json.data;
+                        } else {
+                            showAlert('Error loading data: ' + json.message, 'danger');
+                            return [];
+                        }
+                    }
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "name" },
+                    { "data": "customer_id" },
+                    { "data": "gender" },
+                    { "data": "age" },
+                    { "data": "email" },
+                    { "data": "phone" },
+                    { "data": "package" },
+                    {
+                        "data": "amount",
+                        "render": function(data, type, row) {
+                            return data ? '₹' + parseFloat(data).toFixed(2) : '';
+                        }
+                    },
+                    {
+                        "data": "status",
+                        "render": function(data, type, row) {
+                            return data == 1 ?
+                                '<span class="badge bg-success">Active</span>' :
+                                '<span class="badge bg-danger">Inactive</span>';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "orderable": false,
+                        "render": function(data, type, row) {
+                            return `
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-warning" onclick="editCustomer(${row.id})" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="deleteCustomer(${row.id})" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
+                "order": [[0, "desc"]],
+                "pageLength": 25,
+                "responsive": true,
+                "language": {
+                    "emptyTable": "No customers found",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ customers",
+                    "infoEmpty": "Showing 0 to 0 of 0 customers",
+                    "infoFiltered": "(filtered from _MAX_ total customers)",
+                    "lengthMenu": "Show _MENU_ customers per page",
+                    "loadingRecords": "Loading customers...",
+                    "processing": "Processing...",
+                    "search": "Search customers:",
+                    "zeroRecords": "No matching customers found"
+                }
+            });
+        }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            $('#date').val(today);
+            $('#edit_date').val(today);
+            updateMonthField('#addUserForm', '#package', '#date', '#month');
+            updateMonthField('#editUserForm', '#edit_package', '#edit_date', '#edit_month');
+        }
+
+function updatePackageFields(formId, packageId, amountId, advanceId, totalAmountId, dateId, dueDateId, monthId) {
+    const packageVal = $(packageId).val();
+    const config = packageConfig[packageVal];
+
+    if (config) {
+        // Set amount and advance values
+        $(amountId).val(config.amount.toFixed(2));
+        $(advanceId).val(config.advance.toFixed(2));
+
+        // Calculate and set total amount (amount - advance)
+        const totalAmount = config.amount - config.advance;
+        $(totalAmountId).val(totalAmount.toFixed(2));
+
+        // Get selected start date (join or payment date)
+        const startDateStr = $(dateId).val();
+        if (startDateStr) {
+            const startDate = new Date(startDateStr);
+            const dueDate = new Date(startDate);
+            dueDate.setMonth(dueDate.getMonth() + config.duration);
+
+            const formattedDueDate = dueDate.toISOString().split("T")[0];
+            $(dueDateId).val(formattedDueDate);
+
+            // Set month (e.g., "August", or "August - October" for duration > 1)
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const startMonth = monthNames[startDate.getMonth()];
+            const endDate = new Date(dueDate);
+            endDate.setDate(endDate.getDate() - 1);
+            const endMonth = monthNames[endDate.getMonth()];
+
+            const monthValue = config.duration === 1 ? startMonth : `${startMonth} - ${endMonth}`;
+            $(monthId).val(monthValue);
+        } else {
+            $(dueDateId).val('');
+            $(monthId).val('');
+        }
+    } else {
+        // Clear fields if no package is selected
+        $(amountId).val('');
+        $(advanceId).val('');
+        $(totalAmountId).val('');
+        $(dueDateId).val('');
+        $(monthId).val('');
+    }
+}
+
+        function updateDueDate(formId, packageId, dateId, dueDateId) {
+            if (isOnBreak && formId === '#editUserForm') {
+                $(dueDateId).val('');
+                return;
+            }
+
+            const packageVal = $(packageId).val();
+            const dateVal = $(dateId).val();
+
+            if (!packageVal || !dateVal) {
+                $(dueDateId).val('');
+                return;
+            }
+
+            const config = packageConfig[packageVal];
+            if (!config) return;
+
+            const startDate = new Date(dateVal);
+            let dueDate;
+
+            if (config.duration === 'month') {
+                dueDate = new Date(startDate);
+                dueDate.setMonth(dueDate.getMonth() + 1);
+            } else if (config.duration === '3months') {
+                dueDate = new Date(startDate);
+                dueDate.setMonth(dueDate.getMonth() + 3);
+            } else if (config.duration === 'year') {
+                dueDate = new Date(startDate);
+                dueDate.setFullYear(dueDate.getFullYear() + 1);
+            } else if (config.duration === 'week') {
+                dueDate = new Date(startDate);
+                dueDate.setDate(dueDate.getDate() + 7);
+            }
+
+            if (dueDate) {
+                $(dueDateId).val(dueDate.toISOString().split('T')[0]);
+            } else {
+                $(dueDateId).val('');
+            }
+        }
+        function updateMonthField(formId, packageId, dateId, monthId) {
+            const packageVal = $(packageId).val();
+            const dateVal = $(dateId).val();
+            if (!packageVal || !dateVal) {
+                $(monthId).val('');
+                return;
+            }
+            if (packageVal.includes('Monthly')) {
+                const date = new Date(dateVal);
+                $(monthId).val(monthNames[date.getMonth()]);
+            } else {
+                $(monthId).val('');
+            }
+        }
+
+        function showAddUserModal() {
+            $('#addUserForm')[0].reset();
+            setDefaultDate();
+            $('#addUserForm .image-preview').hide();
+            $('#add_photo_preview').attr('src', '');
+            $('#package').val('');
+            $('#amount').val('');
+            $('#advance').val('');
+            $('#total_amount').val('');
+            $('#due_date').val('');
+            $('#month').val('');
+            $('#addUserModal').modal('show');
+        }
+
+function submitAddUser() {
+    const form = $('#addUserForm')[0];
+    const formData = new FormData(form);
+    formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+    const requiredFields = ['name', 'email', 'phone', 'package', 'date', 'transaction_type'];
+    let isValid = true;
+    requiredFields.forEach(field => {
+        const value = formData.get(field);
+        if (!value || value.trim() === '') {
+            showAlert(`Please fill in the ${field} field.`, 'danger');
+            isValid = false;
+        }
+    });
+    if (!isValid) return;
+    $.ajax({
+        url: "{% url 'add_user' %}",
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showAlert(response.message, 'success');
+                $('#addUserModal').modal('hide');
+                customersTable.ajax.reload();
+                updateStats();
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while adding the customer.', 'danger');
+            console.error('Error:', error);
+        }
+    });
+}
+
+function editCustomer(customerId) {
+    editingCustomerId = customerId;
+    $.ajax({
+        url: `/edit_customer/${customerId}/`,
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const data = response.data;
+                $('#edit_customer_id').val(data.id);
+                $('#edit_name').val(data.name);
+                $('#edit_customer_id_field').val(data.customer_id);
+                $('#edit_gender').val(data.gender || '');
+                $('#edit_age').val(data.age || '');
+                $('#edit_email').val(data.email);
+                $('#edit_phone').val(data.phone);
+                $('#edit_address').val(data.address || '');
+                $('#edit_weight').val(data.weight || '');
+                $('#edit_height').val(data.height || '');
+                $('#edit_blood_group').val(data.blood_group || '');
+                $('#edit_bp_sugar').val(data.bp_sugar || '');
+                $('#edit_sugar').val(data.sugar || '');
+                $('#edit_other_problems').val(data.other_problems || '');
+                $('#edit_package').val(data.package || '');
+                $('#edit_transaction_type').val(data.transaction_type || '');
+                $('#edit_amount').val(data.amount ? parseFloat(data.amount).toFixed(2) : '');
+                $('#edit_advance').val(data.advance ? parseFloat(data.advance).toFixed(2) : '');
+                $('#edit_total_amount').val(data.total_amount ? parseFloat(data.total_amount).toFixed(2) : '');
+                $('#edit_date').val(data.date || '');
+                $('#edit_due_date').val(data.due_date || '');
+                $('#edit_last_paid').val(data.last_paid || '');
+                $('#edit_month').val(data.month || '');
+                $('#edit_status').val(data.status);
+                $('#edit_break_start').val(data.break_start || '');
+                $('#edit_break_end').val(data.break_end || '');
+                $('#edit_message_clicks').val(data.message_clicks || 0);
+                if (data.photo_url) {
+                    $('#current_photo').attr('src', data.photo_url).show();
+                    $('#remove_photo_btn').show();
+                } else {
+                    $('#current_photo').attr('src', '').hide();
+                    $('#remove_photo_btn').hide();
+                }
+                $('#edit_photo_preview').attr('src', '').parent().hide();
+                $('#remove_photo_flag').remove();
+                isOnBreak = !!data.break_start;
+                $('#break_btn').toggle(!isOnBreak);
+                $('#unbreak_btn').toggle(isOnBreak);
+                $('#editUserModal').modal('show');
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while fetching customer data.', 'danger');
+            console.error('Error:', error);
+        }
+    });
+}
+
+function submitEditUser() {
+    const form = $('#editUserForm')[0];
+    const formData = new FormData(form);
+    formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+    formData.append('id', editingCustomerId);
+    const requiredFields = ['name', 'email', 'phone', 'package', 'date', 'transaction_type'];
+    let isValid = true;
+    requiredFields.forEach(field => {
+        const value = formData.get(field);
+        if (!value || value.trim() === '') {
+            showAlert(`Please fill in the ${field} field.`, 'danger');
+            isValid = false;
+        }
+    });
+    if (!isValid) return;
+    $.ajax({
+        url: `/edit_customer/${editingCustomerId}/`,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showAlert(response.message, 'success');
+                $('#editUserModal').modal('hide');
+                customersTable.ajax.reload();
+                updateStats();
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('An error occurred while updating the customer.', 'danger');
+            console.error('Error:', error);
+        }
+    });
+}
+        function deleteCustomer(customerId) {
+            deletingCustomerId = customerId;
+            $('#delete_customer_id').val(customerId);
+            $('#deleteConfirmModal').modal('show');
+        }
+
+        function confirmDelete() {
+            $.ajax({
+                url: `/delete_customer/${deletingCustomerId}/`,
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert(response.message, 'success');
+                        $('#deleteConfirmModal').modal('hide');
+                        customersTable.ajax.reload();
+                        updateStats();
+                    } else {
+                        showAlert(response.message, 'danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showAlert('An error occurred while deleting the customer.', 'danger');
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function updateStats() {
+            $.ajax({
+                url: "{% url 'get_customers_data' %}",
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        $('.stats-card h4').text(response.data.length);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating stats:', error);
+                }
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $('#alertContainer').html(alertHtml);
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        $('#photo').change(function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#add_photo_preview').attr('src', e.target.result);
+                    $('#addUserForm .image-preview').show();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                $('#add_photo_preview').attr('src', '');
+                $('#addUserForm .image-preview').hide();
+            }
+        });
+
+        $('#edit_photo').change(function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_photo_preview').attr('src', e.target.result);
+                    $('#editUserForm .image-preview').show();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                $('#edit_photo_preview').attr('src', '');
+                $('#editUserForm .image-preview').hide();
+            }
+        });
+    </script>
+</body>
+</html>

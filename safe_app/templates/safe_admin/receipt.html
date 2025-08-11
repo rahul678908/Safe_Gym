@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .receipt {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 150px;
+            height: auto;
+        }
+        .header h2 {
+            color: #ff0000;
+            margin: 5px 0;
+        }
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .details-table, .amount-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .details-table td, .amount-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .details-table td:first-child, .amount-table td:first-child {
+            font-weight: bold;
+        }
+        .amount-table .total-row {
+            font-weight: bold;
+        }
+        .received {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .signatures span {
+            border-bottom: 1px solid #000;
+            width: 200px;
+            text-align: center;
+        }
+        .whatsapp-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .whatsapp-btn:hover {
+            background-color: #20b855;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt" id="receipt">
+        <div class="header">
+            <img src="img/logo/safe.jpg" alt="GymOne Logo">
+            <h2>Safe Gym</h2>
+        </div>
+        <table class="details-table">
+            <tr>
+                <td>Receipt No:</td>
+                <td>5</td>
+                <td>Date:</td>
+                <td>01/08/2025</td>
+            </tr>
+            <tr>
+                <td>Name:</td>
+                <td id="customerName">SAINESHWAR BAGERI</td>
+                <td>Member no:</td>
+                <td id="customerId">GYMONE1/2016</td>
+            </tr>
+        </table>
+        <table class="amount-table">
+            <tr>
+                <td>Sr No</td>
+                <td>Work out Type</td>
+                <td>Date of Transaction</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>GYM</td>
+                <td id="transactionDate">From N/A to N/A</td>
+                <td id="totalAmount">1200.00</td>
+            </tr>
+            <tr class="total-row">
+                <td></td>
+                <td></td>
+                <td>TOTAL</td>
+                <td id="totalAmountDisplay">1200.00</td>
+            </tr>
+        </table>
+        <div class="received" id="receivedRupees">Received Rupees: ONE THOUSAND TWO HUNDRED ONLY</div>
+        <div>By: cash</div>
+        <div class="signatures">
+            <span>Received by: User</span>
+            <span>Receiver's Signature</span>
+        </div>
+        <div id="whatsappContainer">
+            <a href="#" id="whatsappLink" class="whatsapp-btn">Send via WhatsApp</a>
+        </div>
+    </div>
+
+    <script>
+        // Sample customer data (to be replaced with actual data from backend)
+        const customerData = {
+            name: "SAINESHWAR BAGERI",
+            customer_id: "GYMONE1/2016",
+            last_paid: null,
+            due_date: null,
+            total_amount: 1200.00
+        };
+
+        // Function to format dates
+        function formatDate(dateStr) {
+            return dateStr ? new Date(dateStr).toLocaleDateString('en-GB') : 'N/A';
+        }
+
+        // Function to convert amount to words
+        function numberToWords(amount) {
+            const units = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
+            const teens = ['TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
+            const tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
+
+            function convertLessThanThousand(num) {
+                if (num === 0) return '';
+                if (num < 10) return units[num];
+                if (num < 20) return teens[num - 10];
+                if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + units[num % 10] : '');
+                return units[Math.floor(num / 100)] + ' HUNDRED' + (num % 100 ? ' ' + convertLessThanThousand(num % 100) : '');
+            }
+
+            const amountStr = amount.toFixed(2).split('.');
+            let words = convertLessThanThousand(parseInt(amountStr[0]));
+            return words ? words + ' ONLY' : 'ZERO ONLY';
+        }
+
+        // Populate receipt with customer data
+        document.getElementById('customerName').textContent = customerData.name;
+        document.getElementById('customerId').textContent = customerData.customer_id;
+        const transactionDate = `From ${formatDate(customerData.last_paid)} to ${formatDate(customerData.due_date)}`;
+        document.getElementById('transactionDate').textContent = transactionDate;
+        document.getElementById('totalAmount').textContent = `₹${customerData.total_amount.toFixed(2)}`;
+        document.getElementById('totalAmountDisplay').textContent = `₹${customerData.total_amount.toFixed(2)}`;
+        document.getElementById('receivedRupees').textContent = `Received Rupees: ${numberToWords(customerData.total_amount)}`;
+
+        // WhatsApp functionality
+        document.getElementById('whatsappLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            const phoneNumber = prompt('Please enter the WhatsApp number (with country code, e.g., +919876543210):');
+            if (phoneNumber) {
+                const message = `Here is your receipt for ${customerData.name}:\nAmount: ₹${customerData.total_amount.toFixed(2)}\nDate: 01/08/2025`;
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            }
+        });
+    </script>
+</body>
+</html>

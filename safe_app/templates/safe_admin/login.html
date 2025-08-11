@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Admin Login - Safe Gym</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .grid-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .neon-glow {
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 0, 150, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .neon-glow:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            left: auto;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.3) 0%, transparent 70%);
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 450px;
+            position: relative;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: cardAppear 1s ease-out;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(0, 255, 136, 0.1), rgba(255, 0, 150, 0.1));
+            border-radius: 20px;
+            padding: 2px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: xor;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .brand-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #ff0096);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .brand-logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(45deg, #00ff88, #ff0096);
+            border-radius: 2px;
+        }
+
+        .brand-tagline {
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            color: #00ff88;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .input-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .input-wrapper:focus-within::before {
+            left: 100%;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .input-group input::placeholder {
+            color: #666;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00ff88;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: #ff0096;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff88;
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .custom-checkbox:checked {
+            background: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .checkbox-label {
+            color: #ccc;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: #ff0096;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .forgot-link:hover {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #00ff88, #ff0096);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-button:hover::before {
+            left: 100%;
+        }
+
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .login-button:active {
+            transform: translateY(-1px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .divider span {
+            background: #1a1a1a;
+            padding: 0 20px;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .signup-section {
+            text-align: center;
+        }
+
+        .signup-text {
+            color: #999;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .signup-link {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .signup-link:hover {
+            color: #ff0096;
+            text-shadow: 0 0 10px rgba(255, 0, 150, 0.5);
+        }
+
+        .cyber-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .cyber-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: lineMove 3s linear infinite;
+        }
+
+        .cyber-line:nth-child(1) {
+            top: 20%;
+            width: 200px;
+            animation-delay: 0s;
+        }
+
+        .cyber-line:nth-child(2) {
+            top: 60%;
+            width: 150px;
+            animation-delay: 1s;
+        }
+
+        .cyber-line:nth-child(3) {
+            top: 80%;
+            width: 100px;
+            animation-delay: 2s;
+        }
+
+        @keyframes lineMove {
+            0% { left: -200px; }
+            100% { left: 100%; }
+        }
+
+        .error-message {
+            color: #ff0096;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 0, 150, 0.5);
+        }
+
+        @media (max-width: 500px) {
+            .login-card {
+                width: 95%;
+                padding: 40px 30px;
+            }
+            
+            .brand-logo {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-background"></div>
+    <div class="neon-glow"></div>
+    <div class="neon-glow"></div>
+    
+    <div class="cyber-lines">
+        <div class="cyber-line"></div>
+        <div class="cyber-line"></div>
+        <div class="cyber-line"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="login-card">
+            <div class="brand-section">
+                <h1 class="brand-logo">SAFE GYM</h1>
+                <p class="brand-tagline">ADMIN LOGIN</p>
+            </div>
+
+            <form method="POST" action="{% url 'admin_login' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="remember" name="remember" class="custom-checkbox">
+                        <label for="remember" class="checkbox-label">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-button">Access System</button>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </form>
+
+            <div class="divider">
+                <span>Or</span>
+            </div>
+
+            <div class="signup-section">
+                <p class="signup-text">New to SAFE Fitness?</p>
+                <a href="#" class="signup-link">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const toggle = document.querySelector('.password-toggle');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggle.textContent = '🙈';
+            } else {
+                passwordField.type = 'password';
+                toggle.textContent = '👁️';
+            }
+        }
+
+        // Add cyber animation effects
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.3)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Custom checkbox functionality
+        document.querySelector('.custom-checkbox').addEventListener('change', function() {
+            this.style.transform = this.checked ? 'scale(1.1)' : 'scale(1)';
+        });
+
+        // Prevent back/forward cache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

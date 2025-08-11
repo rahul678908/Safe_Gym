@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers List</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <style>
+        table.dataTable th, table.dataTable td {
+            padding: 10px;
+            text-align: left;
+        }
+        .container {
+            margin: 20px;
+        }
+        .customer-photo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Customers List</h2>
+        <table id="customersTable" class="display">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Customer ID</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Package</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.id }}</td>
+                    <td>
+                        {% if customer.photo %}
+                            <img src="{{ customer.photo }}" alt="{{ customer.name }}'s photo" class="customer-photo">
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.customer_id|default_if_none:"-" }}</td>
+                    <td>{{ customer.gender|default_if_none:"-" }}</td>
+                    <td>{{ customer.age|default_if_none:"-" }}</td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.phone }}</td>
+                    <td>{{ customer.package }}</td>
+                    <td>{{ customer.amount|default_if_none:"-" }}</td>
+                    <td>{{ customer.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11">No customers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#customersTable').DataTable({
+                "pageLength": 10,
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    { "orderable": true, "targets": "_all" },
+                    { "orderable": false, "targets": 1 } // Disable sorting on Photo column
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
