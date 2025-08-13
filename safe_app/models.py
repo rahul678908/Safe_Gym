@@ -76,7 +76,7 @@ class Customers(models.Model):
 class TblAddfees(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)    
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='fees')  # ✅ Correct FK
+    customer = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='fees')  
     month = models.CharField(max_length=55)
     join_date = models.DateField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)

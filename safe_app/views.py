@@ -260,9 +260,10 @@ def add_user(request):
 
             print(f"Customer created: {customer.name} (ID: {customer.id})")
             # Save fee entry
+            # Save fee entry
             try:
-                TblAddfees.objects.create(
-                    name=customer.name,  # ✅ Or however you get the name
+                fee_record = TblAddfees.objects.create(
+                    name=customer.name,
                     customer=customer,
                     month=month or '',
                     join_date=start_date,
@@ -273,12 +274,26 @@ def add_user(request):
                     status=int(status),
                     transaction_type=transaction_type,
                     created_at=timezone.now(),
-                    updated_at=timezone.now()
+                    updated_at=timezone.now(),
+                    last_paid=start_date if advance_amount > 0 else None
                 )
                 print(f"Fee details saved for customer: {customer.name} (ID: {customer.id})")
-            except:
-                logger.error("Error saving fee details", exc_info=True)
-                return JsonResponse({'success': False, 'message': 'Error saving fee details.'}, status=500)
+
+                # ✅ Save initial payment history entry
+                PaymentHistory.objects.create(
+                    fee=fee_record,
+                    date=start_date,
+                    amount=amount,  
+                    method=transaction_type,
+                    status='Completed',
+                    created_at=timezone.now()
+                )
+                print(f"Payment history created for fee ID: {fee_record.id}")
+
+            except Exception:
+                logger.error("Error saving fee or payment history", exc_info=True)
+                return JsonResponse({'success': False, 'message': 'Error saving fee details or payment history.'}, status=500)
+
             return JsonResponse({'success': True, 'message': 'Customer added successfully!', 'customer_id': customer.id})
 
         except Exception as e:
@@ -1951,28 +1966,59 @@ def unbreak_member(request, customer_id):
             customer = get_object_or_404(Customers, id=customer_id)
 
             if not customer.break_start:
-                return JsonResponse({'success': False, 'message': 'This member is not currently on break.'})
+                return JsonResponse({
+                    'success': False,
+                    'message': 'This member is not currently on break.'
+                })
 
             break_end = datetime.now().date()
-            
-            # Allow break periods of 0 days (same day breaks)
-            break_days = (break_end - customer.break_start).days + 1  # Add 1 to count the start day
+            break_days = (break_end - customer.break_start).days + 1  # Include start day
 
-            # Extend the due date
+            # Extend due date if exists
             if customer.due_date:
                 customer.due_date += timedelta(days=break_days)
 
             skipped_range = f"{customer.break_start} to {break_end}"
 
-            customer.status = 1  # Reactivated
+            # Update Customers table
+            customer.status = 1  # Active
             customer.break_end = break_end
             customer.break_start = None
-            customer.save()
+            customer.updated_at = datetime.now()
+            customer.save(update_fields=[
+                'status', 'break_start', 'break_end', 'due_date', 'updated_at'
+            ])
+
+            # Update TblAddfees table (keep statuses in sync)
+            TblAddfees.objects.filter(customer_id=customer.id).update(
+                status=1
+            )
+
+            # Prepare full updated data for DataTables
+            updated_data = {
+                'id': customer.id,
+                'customer_id': customer.customer_id,
+                'name': customer.name,
+                'gender': customer.gender,
+                'age': customer.age,
+                'email': customer.email,
+                'phone': customer.phone,
+                'package': customer.package,
+                'amount': float(customer.amount) if customer.amount else None,
+                'advance': float(customer.advance) if customer.advance else None,
+                'total_amount': float(customer.total_amount) if customer.total_amount else None,
+                'due_date': customer.due_date.strftime('%Y-%m-%d') if customer.due_date else None,
+                'last_paid': customer.last_paid.strftime('%Y-%m-%d') if customer.last_paid else None,
+                'status': customer.status,
+                'break_start': None,
+                'break_end': customer.break_end.strftime('%Y-%m-%d') if customer.break_end else None
+            }
 
             return JsonResponse({
                 'success': True,
                 'message': f'{customer.name} reactivated. Skipped {break_days} days: {skipped_range}',
-                'skipped_dates': skipped_range
+                'skipped_dates': skipped_range,
+                'updated_data': updated_data
             })
 
         except Exception as e:
@@ -2046,8 +2092,10 @@ def generate_receipt(request, customer_id):
         customer = get_object_or_404(Customers, id=customer_id)
         logger.debug(f"Customer data: {customer.__dict__}")
         total_amount = float(customer.total_amount) if customer.total_amount is not None else 0.0
-        # Sanitize phone number (keep only digits)
+        # Sanitize phone number (keep only digits and prepend +91)
         phone = ''.join(filter(str.isdigit, customer.phone or '')) if customer.phone else ''
+        if phone:  # Only prepend +91 if phone is not empty
+            phone = f"+91{phone}"
         # Escape customer name for JavaScript
         safe_name = json.dumps(customer.name or 'Unknown')  # Escapes quotes and special characters
         # Generate WhatsApp URL
@@ -2220,7 +2268,6 @@ def generate_receipt(request, customer_id):
     except Exception as e:
         logger.error(f"Error in generate_receipt: {str(e)}")
         return JsonResponse({'success': False, 'message': f'Error generating receipt: {str(e)}'}, status=500)
-
 
 def number_to_words(amount):
     try:

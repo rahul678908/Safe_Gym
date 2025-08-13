@@ -14,12 +14,6 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/buttons.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/responsive.dataTables.min.css">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-
-    
     
     <style>
         * {
@@ -1084,26 +1078,24 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Payment History</h5>
+                <h5 class="modal-title" id="historyModalLabel">Payment History</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" id="paymentHistoryContent">
-                <table id="paymentHistoryTable" class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th>Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Payment history will be injected here -->
-                    </tbody>
-                </table>
+            <table id="paymentHistoryTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -1126,6 +1118,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/buttons.html5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.responsive.min.js"></script>
+
 
 <!-- Required libraries for exporting (JSZip, PDFMake) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
@@ -1396,7 +1389,6 @@ function initializeDataTable() {
                             }
                             <button class="btn btn-sm btn-receipt" onclick="printReceipt(${row.id})" title="Print Receipt">🧾</button>
                             <button class="btn btn-sm btn-history" onclick="showPaymentHistory(${row.id}, '${row.name}')" title="Payment History">📊</button>
-                            <button class="btn btn-sm btn-add-next" onclick="addNextMonthFee(${row.id})" title="Add Next Month Fee">➕</button>
                         </div>
                     `;
                 }
@@ -1677,9 +1669,14 @@ async function breakMember(id) {
             const result = await response.json();
             console.log('Break Member Response:', result);
             if (result.success) {
-                fetchFeeData().then(() => {
-                    alert(result.message);
-                });
+                const feeIndex = feeData.findIndex(f => f.id === id);
+                if (feeIndex !== -1) {
+                    feeData[feeIndex].status = 3;
+                    feeData[feeIndex].break_status = true;
+                    feeData[feeIndex].is_overdue = false;
+                }
+                initializeDataTable();
+                alert(result.message);
             } else {
                 alert('Error putting member on break: ' + result.message);
             }
@@ -1689,30 +1686,38 @@ async function breakMember(id) {
     }
 }
 
-// Unbreak Member
 async function unbreakMember(id) {
     const fee = feeData.find(f => f.id === id);
     if (!fee) {
         alert('Fee record not found for ID: ' + id);
         return;
     }
+
     if (confirm(`Are you sure you want to reactivate ${fee.name}?`)) {
         try {
             const response = await fetch(`{% url 'unbreak_member' 0 %}`.replace('0', id), {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json' }
             });
+
             const result = await response.json();
             console.log('Unbreak Member Response:', result);
+
             if (result.success) {
-                fetchFeeData().then(() => {
-                    alert(result.message);
-                });
+                const feeIndex = feeData.findIndex(f => f.id === id);
+                if (feeIndex !== -1 && result.updated_data) {
+                    // Merge updated fields without losing existing ones
+                    Object.assign(feeData[feeIndex], result.updated_data);
+                }
+                initializeDataTable();
+                alert(result.message);
             } else {
                 alert('Error reactivating member: ' + result.message);
             }
+
         } catch (error) {
             alert('Error reactivating member: ' + error.message);
+            console.error('Error reactivating member:', error);
         }
     }
 }
@@ -1809,10 +1814,18 @@ async function printReceipt(id) {
     }
 }
 
-// Show Payment History
+// Init once globally
+const paymentHistoryDT = $('#paymentHistoryTable').DataTable({
+    responsive: true,
+    dom: 'Bfrtip',
+    buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+    pageLength: 10,
+    ordering: true,
+    searching: true
+});
+
 function showPaymentHistory(feeId, customerName) {
-    const name = customerName || 'Customer';
-    $('#modalTitle').text(`Payment History for ${name}`);
+    $('#historyModalLabel').text(`Payment History for ${customerName || 'Customer'}`);
 
     $.ajax({
         url: `/payment_history/${feeId}/`,
@@ -1820,43 +1833,55 @@ function showPaymentHistory(feeId, customerName) {
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success: function(response) {
             console.log('Payment History Response:', response);
-            const historyTableBody = $('#paymentHistoryTable tbody');
-            historyTableBody.empty();
 
-            if (response.success && response.history.length > 0) {
-                response.history.forEach(entry => {
-                    const row = `
-                        <tr>
-                            <td>${formatDate(entry.date)}</td>
-                            <td>${formatCurrency(entry.amount)}</td>
-                            <td>${entry.method || '-'}</td>
-                            <td>${getStatusText(entry.status)}</td>
-                            <td>${formatDate(entry.created_at)}</td>
-                        </tr>`;
-                    historyTableBody.append(row);
-                });
+            paymentHistoryDT.clear(); // Clear old data
+
+            if (response.success && response.history.length) {
+                const rows = response.history.map(entry => [
+                    formatDate(entry.date),
+                    formatCurrency(entry.amount),
+                    entry.method || '-',
+                    getStatusText(entry.status),
+                    formatDate(entry.created_at)
+                ]);
+                paymentHistoryDT.rows.add(rows).draw();
             } else {
-                const noDataRow = `<tr><td colspan="5">No payment history available.</td></tr>`;
-                historyTableBody.append(noDataRow);
+                paymentHistoryDT.row.add([
+                    'No payment history available.',
+                    '', '', '', ''
+                ]).draw();
             }
-
-            if ($.fn.DataTable.isDataTable('#paymentHistoryTable')) {
-                $('#paymentHistoryTable').DataTable().destroy();
-            }
-
-            $('#paymentHistoryTable').DataTable({
-                responsive: true,
-                dom: 'Bfrtip',
-                buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
-            });
 
             $('#historyModal').modal('show');
-        },
-        error: function(xhr) {
-            console.error('Error fetching payment history:', xhr.responseText);
-            alert('Error fetching payment history.');
         }
     });
+}
+
+// Utility function to format date
+function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+// Utility function to format currency
+function formatCurrency(amount) {
+    if (!amount) return '0.00';
+    return parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
+
+// Utility function to get status text
+function getStatusText(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'completed': 'Completed',
+        'failed': 'Failed'
+    };
+    return statusMap[status.toLowerCase()] || status || '-';
 }
 
 // Event Listeners
